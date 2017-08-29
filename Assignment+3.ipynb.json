@@ -1,0 +1,1438 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "---\n",
+    "\n",
+    "_You are currently looking at **version 1.5** of this notebook. To download notebooks and datafiles, as well as get help on Jupyter notebooks in the Coursera platform, visit the [Jupyter Notebook FAQ](https://www.coursera.org/learn/python-data-analysis/resources/0dhYG) course resource._\n",
+    "\n",
+    "---"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Assignment 3 - More Pandas\n",
+    "This assignment requires more individual learning then the last one did - you are encouraged to check out the [pandas documentation](http://pandas.pydata.org/pandas-docs/stable/) to find functions or methods you might not have used yet, or ask questions on [Stack Overflow](http://stackoverflow.com/) and tag them as pandas and python related. And of course, the discussion forums are open for interaction with your peers and the course staff."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 1 (20%)\n",
+    "Load the energy data from the file `Energy Indicators.xls`, which is a list of indicators of [energy supply and renewable electricity production](Energy%20Indicators.xls) from the [United Nations](http://unstats.un.org/unsd/environment/excel_file_tables/2013/Energy%20Indicators.xls) for the year 2013, and should be put into a DataFrame with the variable name of **energy**.\n",
+    "\n",
+    "Keep in mind that this is an Excel file, and not a comma separated values file. Also, make sure to exclude the footer and header information from the datafile. The first two columns are unneccessary, so you should get rid of them, and you should change the column labels so that the columns are:\n",
+    "\n",
+    "`['Country', 'Energy Supply', 'Energy Supply per Capita', '% Renewable']`\n",
+    "\n",
+    "Convert `Energy Supply` to gigajoules (there are 1,000,000 gigajoules in a petajoule). For all countries which have missing data (e.g. data with \"...\") make sure this is reflected as `np.NaN` values.\n",
+    "\n",
+    "Rename the following list of countries (for use in later questions):\n",
+    "\n",
+    "```\"Republic of Korea\": \"South Korea\",\n",
+    "\"United States of America\": \"United States\",\n",
+    "\"United Kingdom of Great Britain and Northern Ireland\": \"United Kingdom\",\n",
+    "\"China, Hong Kong Special Administrative Region\": \"Hong Kong\"```\n",
+    "\n",
+    "There are also several countries with numbers and/or parenthesis in their name. Be sure to remove these, \n",
+    "\n",
+    "e.g. \n",
+    "\n",
+    "`'Bolivia (Plurinational State of)'` should be `'Bolivia'`, \n",
+    "\n",
+    "`'Switzerland17'` should be `'Switzerland'`.\n",
+    "\n",
+    "<br>\n",
+    "\n",
+    "Next, load the GDP data from the file `world_bank.csv`, which is a csv containing countries' GDP from 1960 to 2015 from [World Bank](http://data.worldbank.org/indicator/NY.GDP.MKTP.CD). Call this DataFrame **GDP**. \n",
+    "\n",
+    "Make sure to skip the header, and rename the following list of countries:\n",
+    "\n",
+    "```\"Korea, Rep.\": \"South Korea\", \n",
+    "\"Iran, Islamic Rep.\": \"Iran\",\n",
+    "\"Hong Kong SAR, China\": \"Hong Kong\"```\n",
+    "\n",
+    "<br>\n",
+    "\n",
+    "Finally, load the [Sciamgo Journal and Country Rank data for Energy Engineering and Power Technology](http://www.scimagojr.com/countryrank.php?category=2102) from the file `scimagojr-3.xlsx`, which ranks countries based on their journal contributions in the aforementioned area. Call this DataFrame **ScimEn**.\n",
+    "\n",
+    "Join the three datasets: GDP, Energy, and ScimEn into a new dataset (using the intersection of country names). Use only the last 10 years (2006-2015) of GDP data and only the top 15 countries by Scimagojr 'Rank' (Rank 1 through 15). \n",
+    "\n",
+    "The index of this DataFrame should be the name of the country, and the columns should be ['Rank', 'Documents', 'Citable documents', 'Citations', 'Self-citations',\n",
+    "       'Citations per document', 'H index', 'Energy Supply',\n",
+    "       'Energy Supply per Capita', '% Renewable', '2006', '2007', '2008',\n",
+    "       '2009', '2010', '2011', '2012', '2013', '2014', '2015'].\n",
+    "\n",
+    "*This function should return a DataFrame with 20 columns and 15 entries.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Energy Supply</th>\n",
+       "      <th>Energy Supply per capita</th>\n",
+       "      <th>% Renewable</th>\n",
+       "      <th>2006</th>\n",
+       "      <th>2007</th>\n",
+       "      <th>2008</th>\n",
+       "      <th>2009</th>\n",
+       "      <th>2010</th>\n",
+       "      <th>2011</th>\n",
+       "      <th>2012</th>\n",
+       "      <th>2013</th>\n",
+       "      <th>2014</th>\n",
+       "      <th>2015</th>\n",
+       "      <th>Rank</th>\n",
+       "      <th>Documents</th>\n",
+       "      <th>Citable documents</th>\n",
+       "      <th>Citations</th>\n",
+       "      <th>Self-citations</th>\n",
+       "      <th>Citations per document</th>\n",
+       "      <th>H index</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>Australia</th>\n",
+       "      <td>5.386000e+09</td>\n",
+       "      <td>231.0</td>\n",
+       "      <td>11.810810</td>\n",
+       "      <td>1.021939e+12</td>\n",
+       "      <td>1.060340e+12</td>\n",
+       "      <td>1.099644e+12</td>\n",
+       "      <td>1.119654e+12</td>\n",
+       "      <td>1.142251e+12</td>\n",
+       "      <td>1.169431e+12</td>\n",
+       "      <td>1.211913e+12</td>\n",
+       "      <td>1.241484e+12</td>\n",
+       "      <td>1.272520e+12</td>\n",
+       "      <td>1.301251e+12</td>\n",
+       "      <td>14</td>\n",
+       "      <td>8831</td>\n",
+       "      <td>8725</td>\n",
+       "      <td>90765</td>\n",
+       "      <td>15606</td>\n",
+       "      <td>10.28</td>\n",
+       "      <td>107</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Brazil</th>\n",
+       "      <td>1.214900e+10</td>\n",
+       "      <td>59.0</td>\n",
+       "      <td>69.648030</td>\n",
+       "      <td>1.845080e+12</td>\n",
+       "      <td>1.957118e+12</td>\n",
+       "      <td>2.056809e+12</td>\n",
+       "      <td>2.054215e+12</td>\n",
+       "      <td>2.208872e+12</td>\n",
+       "      <td>2.295245e+12</td>\n",
+       "      <td>2.339209e+12</td>\n",
+       "      <td>2.409740e+12</td>\n",
+       "      <td>2.412231e+12</td>\n",
+       "      <td>2.319423e+12</td>\n",
+       "      <td>15</td>\n",
+       "      <td>8668</td>\n",
+       "      <td>8596</td>\n",
+       "      <td>60702</td>\n",
+       "      <td>14396</td>\n",
+       "      <td>7.00</td>\n",
+       "      <td>86</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Canada</th>\n",
+       "      <td>1.043100e+10</td>\n",
+       "      <td>296.0</td>\n",
+       "      <td>61.945430</td>\n",
+       "      <td>1.564469e+12</td>\n",
+       "      <td>1.596740e+12</td>\n",
+       "      <td>1.612713e+12</td>\n",
+       "      <td>1.565145e+12</td>\n",
+       "      <td>1.613406e+12</td>\n",
+       "      <td>1.664087e+12</td>\n",
+       "      <td>1.693133e+12</td>\n",
+       "      <td>1.730688e+12</td>\n",
+       "      <td>1.773486e+12</td>\n",
+       "      <td>1.792609e+12</td>\n",
+       "      <td>6</td>\n",
+       "      <td>17899</td>\n",
+       "      <td>17620</td>\n",
+       "      <td>215003</td>\n",
+       "      <td>40930</td>\n",
+       "      <td>12.01</td>\n",
+       "      <td>149</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>China</th>\n",
+       "      <td>1.271910e+11</td>\n",
+       "      <td>93.0</td>\n",
+       "      <td>19.754910</td>\n",
+       "      <td>3.992331e+12</td>\n",
+       "      <td>4.559041e+12</td>\n",
+       "      <td>4.997775e+12</td>\n",
+       "      <td>5.459247e+12</td>\n",
+       "      <td>6.039659e+12</td>\n",
+       "      <td>6.612490e+12</td>\n",
+       "      <td>7.124978e+12</td>\n",
+       "      <td>7.672448e+12</td>\n",
+       "      <td>8.230121e+12</td>\n",
+       "      <td>8.797999e+12</td>\n",
+       "      <td>1</td>\n",
+       "      <td>127050</td>\n",
+       "      <td>126767</td>\n",
+       "      <td>597237</td>\n",
+       "      <td>411683</td>\n",
+       "      <td>4.70</td>\n",
+       "      <td>138</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>France</th>\n",
+       "      <td>1.059700e+10</td>\n",
+       "      <td>166.0</td>\n",
+       "      <td>17.020280</td>\n",
+       "      <td>2.607840e+12</td>\n",
+       "      <td>2.669424e+12</td>\n",
+       "      <td>2.674637e+12</td>\n",
+       "      <td>2.595967e+12</td>\n",
+       "      <td>2.646995e+12</td>\n",
+       "      <td>2.702032e+12</td>\n",
+       "      <td>2.706968e+12</td>\n",
+       "      <td>2.722567e+12</td>\n",
+       "      <td>2.729632e+12</td>\n",
+       "      <td>2.761185e+12</td>\n",
+       "      <td>9</td>\n",
+       "      <td>13153</td>\n",
+       "      <td>12973</td>\n",
+       "      <td>130632</td>\n",
+       "      <td>28601</td>\n",
+       "      <td>9.93</td>\n",
+       "      <td>114</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Germany</th>\n",
+       "      <td>1.326100e+10</td>\n",
+       "      <td>165.0</td>\n",
+       "      <td>17.901530</td>\n",
+       "      <td>3.332891e+12</td>\n",
+       "      <td>3.441561e+12</td>\n",
+       "      <td>3.478809e+12</td>\n",
+       "      <td>3.283340e+12</td>\n",
+       "      <td>3.417298e+12</td>\n",
+       "      <td>3.542371e+12</td>\n",
+       "      <td>3.556724e+12</td>\n",
+       "      <td>3.567317e+12</td>\n",
+       "      <td>3.624386e+12</td>\n",
+       "      <td>3.685556e+12</td>\n",
+       "      <td>7</td>\n",
+       "      <td>17027</td>\n",
+       "      <td>16831</td>\n",
+       "      <td>140566</td>\n",
+       "      <td>27426</td>\n",
+       "      <td>8.26</td>\n",
+       "      <td>126</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>India</th>\n",
+       "      <td>3.319500e+10</td>\n",
+       "      <td>26.0</td>\n",
+       "      <td>14.969080</td>\n",
+       "      <td>1.265894e+12</td>\n",
+       "      <td>1.374865e+12</td>\n",
+       "      <td>1.428361e+12</td>\n",
+       "      <td>1.549483e+12</td>\n",
+       "      <td>1.708459e+12</td>\n",
+       "      <td>1.821872e+12</td>\n",
+       "      <td>1.924235e+12</td>\n",
+       "      <td>2.051982e+12</td>\n",
+       "      <td>2.200617e+12</td>\n",
+       "      <td>2.367206e+12</td>\n",
+       "      <td>8</td>\n",
+       "      <td>15005</td>\n",
+       "      <td>14841</td>\n",
+       "      <td>128763</td>\n",
+       "      <td>37209</td>\n",
+       "      <td>8.58</td>\n",
+       "      <td>115</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Iran</th>\n",
+       "      <td>9.172000e+09</td>\n",
+       "      <td>119.0</td>\n",
+       "      <td>5.707721</td>\n",
+       "      <td>3.895523e+11</td>\n",
+       "      <td>4.250646e+11</td>\n",
+       "      <td>4.289909e+11</td>\n",
+       "      <td>4.389208e+11</td>\n",
+       "      <td>4.677902e+11</td>\n",
+       "      <td>4.853309e+11</td>\n",
+       "      <td>4.532569e+11</td>\n",
+       "      <td>4.445926e+11</td>\n",
+       "      <td>4.639027e+11</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>13</td>\n",
+       "      <td>8896</td>\n",
+       "      <td>8819</td>\n",
+       "      <td>57470</td>\n",
+       "      <td>19125</td>\n",
+       "      <td>6.46</td>\n",
+       "      <td>72</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Italy</th>\n",
+       "      <td>6.530000e+09</td>\n",
+       "      <td>109.0</td>\n",
+       "      <td>33.667230</td>\n",
+       "      <td>2.202170e+12</td>\n",
+       "      <td>2.234627e+12</td>\n",
+       "      <td>2.211154e+12</td>\n",
+       "      <td>2.089938e+12</td>\n",
+       "      <td>2.125185e+12</td>\n",
+       "      <td>2.137439e+12</td>\n",
+       "      <td>2.077184e+12</td>\n",
+       "      <td>2.040871e+12</td>\n",
+       "      <td>2.033868e+12</td>\n",
+       "      <td>2.049316e+12</td>\n",
+       "      <td>11</td>\n",
+       "      <td>10964</td>\n",
+       "      <td>10794</td>\n",
+       "      <td>111850</td>\n",
+       "      <td>26661</td>\n",
+       "      <td>10.20</td>\n",
+       "      <td>106</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Japan</th>\n",
+       "      <td>1.898400e+10</td>\n",
+       "      <td>149.0</td>\n",
+       "      <td>10.232820</td>\n",
+       "      <td>5.496542e+12</td>\n",
+       "      <td>5.617036e+12</td>\n",
+       "      <td>5.558527e+12</td>\n",
+       "      <td>5.251308e+12</td>\n",
+       "      <td>5.498718e+12</td>\n",
+       "      <td>5.473738e+12</td>\n",
+       "      <td>5.569102e+12</td>\n",
+       "      <td>5.644659e+12</td>\n",
+       "      <td>5.642884e+12</td>\n",
+       "      <td>5.669563e+12</td>\n",
+       "      <td>3</td>\n",
+       "      <td>30504</td>\n",
+       "      <td>30287</td>\n",
+       "      <td>223024</td>\n",
+       "      <td>61554</td>\n",
+       "      <td>7.31</td>\n",
+       "      <td>134</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>South Korea</th>\n",
+       "      <td>1.100700e+10</td>\n",
+       "      <td>221.0</td>\n",
+       "      <td>2.279353</td>\n",
+       "      <td>9.410199e+11</td>\n",
+       "      <td>9.924316e+11</td>\n",
+       "      <td>1.020510e+12</td>\n",
+       "      <td>1.027730e+12</td>\n",
+       "      <td>1.094499e+12</td>\n",
+       "      <td>1.134796e+12</td>\n",
+       "      <td>1.160809e+12</td>\n",
+       "      <td>1.194429e+12</td>\n",
+       "      <td>1.234340e+12</td>\n",
+       "      <td>1.266580e+12</td>\n",
+       "      <td>10</td>\n",
+       "      <td>11983</td>\n",
+       "      <td>11923</td>\n",
+       "      <td>114675</td>\n",
+       "      <td>22595</td>\n",
+       "      <td>9.57</td>\n",
+       "      <td>104</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Russian Federation</th>\n",
+       "      <td>3.070900e+10</td>\n",
+       "      <td>214.0</td>\n",
+       "      <td>17.288680</td>\n",
+       "      <td>1.385793e+12</td>\n",
+       "      <td>1.504071e+12</td>\n",
+       "      <td>1.583004e+12</td>\n",
+       "      <td>1.459199e+12</td>\n",
+       "      <td>1.524917e+12</td>\n",
+       "      <td>1.589943e+12</td>\n",
+       "      <td>1.645876e+12</td>\n",
+       "      <td>1.666934e+12</td>\n",
+       "      <td>1.678709e+12</td>\n",
+       "      <td>1.616149e+12</td>\n",
+       "      <td>5</td>\n",
+       "      <td>18534</td>\n",
+       "      <td>18301</td>\n",
+       "      <td>34266</td>\n",
+       "      <td>12422</td>\n",
+       "      <td>1.85</td>\n",
+       "      <td>57</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Spain</th>\n",
+       "      <td>4.923000e+09</td>\n",
+       "      <td>106.0</td>\n",
+       "      <td>37.968590</td>\n",
+       "      <td>1.414823e+12</td>\n",
+       "      <td>1.468146e+12</td>\n",
+       "      <td>1.484530e+12</td>\n",
+       "      <td>1.431475e+12</td>\n",
+       "      <td>1.431673e+12</td>\n",
+       "      <td>1.417355e+12</td>\n",
+       "      <td>1.380216e+12</td>\n",
+       "      <td>1.357139e+12</td>\n",
+       "      <td>1.375605e+12</td>\n",
+       "      <td>1.419821e+12</td>\n",
+       "      <td>12</td>\n",
+       "      <td>9428</td>\n",
+       "      <td>9330</td>\n",
+       "      <td>123336</td>\n",
+       "      <td>23964</td>\n",
+       "      <td>13.08</td>\n",
+       "      <td>115</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>United Kingdom</th>\n",
+       "      <td>7.920000e+09</td>\n",
+       "      <td>124.0</td>\n",
+       "      <td>10.600470</td>\n",
+       "      <td>2.419631e+12</td>\n",
+       "      <td>2.482203e+12</td>\n",
+       "      <td>2.470614e+12</td>\n",
+       "      <td>2.367048e+12</td>\n",
+       "      <td>2.403504e+12</td>\n",
+       "      <td>2.450911e+12</td>\n",
+       "      <td>2.479809e+12</td>\n",
+       "      <td>2.533370e+12</td>\n",
+       "      <td>2.605643e+12</td>\n",
+       "      <td>2.666333e+12</td>\n",
+       "      <td>4</td>\n",
+       "      <td>20944</td>\n",
+       "      <td>20357</td>\n",
+       "      <td>206091</td>\n",
+       "      <td>37874</td>\n",
+       "      <td>9.84</td>\n",
+       "      <td>139</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>United States</th>\n",
+       "      <td>9.083800e+10</td>\n",
+       "      <td>286.0</td>\n",
+       "      <td>11.570980</td>\n",
+       "      <td>1.479230e+13</td>\n",
+       "      <td>1.505540e+13</td>\n",
+       "      <td>1.501149e+13</td>\n",
+       "      <td>1.459484e+13</td>\n",
+       "      <td>1.496437e+13</td>\n",
+       "      <td>1.520402e+13</td>\n",
+       "      <td>1.554216e+13</td>\n",
+       "      <td>1.577367e+13</td>\n",
+       "      <td>1.615662e+13</td>\n",
+       "      <td>1.654857e+13</td>\n",
+       "      <td>2</td>\n",
+       "      <td>96661</td>\n",
+       "      <td>94747</td>\n",
+       "      <td>792274</td>\n",
+       "      <td>265436</td>\n",
+       "      <td>8.20</td>\n",
+       "      <td>230</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                    Energy Supply  Energy Supply per capita  % Renewable  \\\n",
+       "Australia            5.386000e+09                     231.0    11.810810   \n",
+       "Brazil               1.214900e+10                      59.0    69.648030   \n",
+       "Canada               1.043100e+10                     296.0    61.945430   \n",
+       "China                1.271910e+11                      93.0    19.754910   \n",
+       "France               1.059700e+10                     166.0    17.020280   \n",
+       "Germany              1.326100e+10                     165.0    17.901530   \n",
+       "India                3.319500e+10                      26.0    14.969080   \n",
+       "Iran                 9.172000e+09                     119.0     5.707721   \n",
+       "Italy                6.530000e+09                     109.0    33.667230   \n",
+       "Japan                1.898400e+10                     149.0    10.232820   \n",
+       "South Korea          1.100700e+10                     221.0     2.279353   \n",
+       "Russian Federation   3.070900e+10                     214.0    17.288680   \n",
+       "Spain                4.923000e+09                     106.0    37.968590   \n",
+       "United Kingdom       7.920000e+09                     124.0    10.600470   \n",
+       "United States        9.083800e+10                     286.0    11.570980   \n",
+       "\n",
+       "                            2006          2007          2008          2009  \\\n",
+       "Australia           1.021939e+12  1.060340e+12  1.099644e+12  1.119654e+12   \n",
+       "Brazil              1.845080e+12  1.957118e+12  2.056809e+12  2.054215e+12   \n",
+       "Canada              1.564469e+12  1.596740e+12  1.612713e+12  1.565145e+12   \n",
+       "China               3.992331e+12  4.559041e+12  4.997775e+12  5.459247e+12   \n",
+       "France              2.607840e+12  2.669424e+12  2.674637e+12  2.595967e+12   \n",
+       "Germany             3.332891e+12  3.441561e+12  3.478809e+12  3.283340e+12   \n",
+       "India               1.265894e+12  1.374865e+12  1.428361e+12  1.549483e+12   \n",
+       "Iran                3.895523e+11  4.250646e+11  4.289909e+11  4.389208e+11   \n",
+       "Italy               2.202170e+12  2.234627e+12  2.211154e+12  2.089938e+12   \n",
+       "Japan               5.496542e+12  5.617036e+12  5.558527e+12  5.251308e+12   \n",
+       "South Korea         9.410199e+11  9.924316e+11  1.020510e+12  1.027730e+12   \n",
+       "Russian Federation  1.385793e+12  1.504071e+12  1.583004e+12  1.459199e+12   \n",
+       "Spain               1.414823e+12  1.468146e+12  1.484530e+12  1.431475e+12   \n",
+       "United Kingdom      2.419631e+12  2.482203e+12  2.470614e+12  2.367048e+12   \n",
+       "United States       1.479230e+13  1.505540e+13  1.501149e+13  1.459484e+13   \n",
+       "\n",
+       "                            2010          2011          2012          2013  \\\n",
+       "Australia           1.142251e+12  1.169431e+12  1.211913e+12  1.241484e+12   \n",
+       "Brazil              2.208872e+12  2.295245e+12  2.339209e+12  2.409740e+12   \n",
+       "Canada              1.613406e+12  1.664087e+12  1.693133e+12  1.730688e+12   \n",
+       "China               6.039659e+12  6.612490e+12  7.124978e+12  7.672448e+12   \n",
+       "France              2.646995e+12  2.702032e+12  2.706968e+12  2.722567e+12   \n",
+       "Germany             3.417298e+12  3.542371e+12  3.556724e+12  3.567317e+12   \n",
+       "India               1.708459e+12  1.821872e+12  1.924235e+12  2.051982e+12   \n",
+       "Iran                4.677902e+11  4.853309e+11  4.532569e+11  4.445926e+11   \n",
+       "Italy               2.125185e+12  2.137439e+12  2.077184e+12  2.040871e+12   \n",
+       "Japan               5.498718e+12  5.473738e+12  5.569102e+12  5.644659e+12   \n",
+       "South Korea         1.094499e+12  1.134796e+12  1.160809e+12  1.194429e+12   \n",
+       "Russian Federation  1.524917e+12  1.589943e+12  1.645876e+12  1.666934e+12   \n",
+       "Spain               1.431673e+12  1.417355e+12  1.380216e+12  1.357139e+12   \n",
+       "United Kingdom      2.403504e+12  2.450911e+12  2.479809e+12  2.533370e+12   \n",
+       "United States       1.496437e+13  1.520402e+13  1.554216e+13  1.577367e+13   \n",
+       "\n",
+       "                            2014          2015  Rank  Documents  \\\n",
+       "Australia           1.272520e+12  1.301251e+12    14       8831   \n",
+       "Brazil              2.412231e+12  2.319423e+12    15       8668   \n",
+       "Canada              1.773486e+12  1.792609e+12     6      17899   \n",
+       "China               8.230121e+12  8.797999e+12     1     127050   \n",
+       "France              2.729632e+12  2.761185e+12     9      13153   \n",
+       "Germany             3.624386e+12  3.685556e+12     7      17027   \n",
+       "India               2.200617e+12  2.367206e+12     8      15005   \n",
+       "Iran                4.639027e+11           NaN    13       8896   \n",
+       "Italy               2.033868e+12  2.049316e+12    11      10964   \n",
+       "Japan               5.642884e+12  5.669563e+12     3      30504   \n",
+       "South Korea         1.234340e+12  1.266580e+12    10      11983   \n",
+       "Russian Federation  1.678709e+12  1.616149e+12     5      18534   \n",
+       "Spain               1.375605e+12  1.419821e+12    12       9428   \n",
+       "United Kingdom      2.605643e+12  2.666333e+12     4      20944   \n",
+       "United States       1.615662e+13  1.654857e+13     2      96661   \n",
+       "\n",
+       "                    Citable documents  Citations  Self-citations  \\\n",
+       "Australia                        8725      90765           15606   \n",
+       "Brazil                           8596      60702           14396   \n",
+       "Canada                          17620     215003           40930   \n",
+       "China                          126767     597237          411683   \n",
+       "France                          12973     130632           28601   \n",
+       "Germany                         16831     140566           27426   \n",
+       "India                           14841     128763           37209   \n",
+       "Iran                             8819      57470           19125   \n",
+       "Italy                           10794     111850           26661   \n",
+       "Japan                           30287     223024           61554   \n",
+       "South Korea                     11923     114675           22595   \n",
+       "Russian Federation              18301      34266           12422   \n",
+       "Spain                            9330     123336           23964   \n",
+       "United Kingdom                  20357     206091           37874   \n",
+       "United States                   94747     792274          265436   \n",
+       "\n",
+       "                    Citations per document  H index  \n",
+       "Australia                            10.28      107  \n",
+       "Brazil                                7.00       86  \n",
+       "Canada                               12.01      149  \n",
+       "China                                 4.70      138  \n",
+       "France                                9.93      114  \n",
+       "Germany                               8.26      126  \n",
+       "India                                 8.58      115  \n",
+       "Iran                                  6.46       72  \n",
+       "Italy                                10.20      106  \n",
+       "Japan                                 7.31      134  \n",
+       "South Korea                           9.57      104  \n",
+       "Russian Federation                    1.85       57  \n",
+       "Spain                                13.08      115  \n",
+       "United Kingdom                        9.84      139  \n",
+       "United States                         8.20      230  "
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def answer_one():\n",
+    "    import pandas as pd\n",
+    "    import numpy as np\n",
+    "    import re\n",
+    "    energy = pd.read_excel('Energy Indicators.xls',header=15, skip_footer=38)\n",
+    "    energy = (energy.drop(['Unnamed: 0','Unnamed: 1'],axis=1).drop(energy.index[0])\n",
+    "              .rename(columns={'Unnamed: 2':'Country','Renewable Electricity Production':'% Renewable'})\n",
+    "             .replace('...',np.nan))\n",
+    "    energy['Energy Supply'] = energy['Energy Supply']*1000000\n",
+    "    energy['Country'] = energy['Country'].apply(lambda x: re.sub(r\"\\(.*\\)\", \"\", x))\n",
+    "    energy['Country'] = energy['Country'].apply(lambda x: re.sub(r\"\\d+\", \"\", x))\n",
+    "    energy['Country'] = energy['Country'].replace(['Republic of Korea','United States of America', 'United Kingdom of Great Britain and Northern Ireland',\n",
+    "'China, Hong Kong Special Administrative Region', 'Iran '],['South Korea','United States','United Kingdom','Hong Kong', 'Iran'])\n",
+    "    GDP = pd.read_csv('world_bank.csv',header=4)\n",
+    "    GDP = (GDP.drop(['Indicator Name','Indicator Code','Country Code'],axis=1)\n",
+    "           .rename(columns={'Country Name':'Country'}))\n",
+    "    GDP['Country'] = GDP['Country'].replace(['Korea, Rep.','Iran, Islamic Rep.', 'Hong Kong SAR, China'],['South Korea','Iran','Hong Kong'])\n",
+    "    ScimEn = pd.read_excel('scimagojr-3.xlsx')\n",
+    "    ScimEn_reduced = ScimEn[ScimEn['Rank']<=15]\n",
+    "    GDP_reduced = GDP.loc[:,['Country','2006','2007','2008','2009','2010','2011','2012','2013','2014','2015']]\n",
+    "    new = pd.merge(energy,GDP_reduced, how='inner',on='Country')\n",
+    "    final = pd.merge(new,ScimEn_reduced, how = 'inner', on='Country')\n",
+    "    indexed= final.set_index('Country')\n",
+    "    indexed.index.name=None\n",
+    "    return indexed\n",
+    "answer_one()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 2 (6.6%)\n",
+    "The previous question joined three datasets then reduced this to just the top 15 entries. When you joined the datasets, but before you reduced this to the top 15 items, how many entries did you lose?\n",
+    "\n",
+    "*This function should return a single number.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 45,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<svg width=\"800\" height=\"300\">\n",
+       "  <circle cx=\"150\" cy=\"180\" r=\"80\" fill-opacity=\"0.2\" stroke=\"black\" stroke-width=\"2\" fill=\"blue\" />\n",
+       "  <circle cx=\"200\" cy=\"100\" r=\"80\" fill-opacity=\"0.2\" stroke=\"black\" stroke-width=\"2\" fill=\"red\" />\n",
+       "  <circle cx=\"100\" cy=\"100\" r=\"80\" fill-opacity=\"0.2\" stroke=\"black\" stroke-width=\"2\" fill=\"green\" />\n",
+       "  <line x1=\"150\" y1=\"125\" x2=\"300\" y2=\"150\" stroke=\"black\" stroke-width=\"2\" fill=\"black\" stroke-dasharray=\"5,3\"/>\n",
+       "  <text  x=\"300\" y=\"165\" font-family=\"Verdana\" font-size=\"35\">Everything but this!</text>\n",
+       "</svg>"
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "%%HTML\n",
+    "<svg width=\"800\" height=\"300\">\n",
+    "  <circle cx=\"150\" cy=\"180\" r=\"80\" fill-opacity=\"0.2\" stroke=\"black\" stroke-width=\"2\" fill=\"blue\" />\n",
+    "  <circle cx=\"200\" cy=\"100\" r=\"80\" fill-opacity=\"0.2\" stroke=\"black\" stroke-width=\"2\" fill=\"red\" />\n",
+    "  <circle cx=\"100\" cy=\"100\" r=\"80\" fill-opacity=\"0.2\" stroke=\"black\" stroke-width=\"2\" fill=\"green\" />\n",
+    "  <line x1=\"150\" y1=\"125\" x2=\"300\" y2=\"150\" stroke=\"black\" stroke-width=\"2\" fill=\"black\" stroke-dasharray=\"5,3\"/>\n",
+    "  <text  x=\"300\" y=\"165\" font-family=\"Verdana\" font-size=\"35\">Everything but this!</text>\n",
+    "</svg>"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 85,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "159"
+      ]
+     },
+     "execution_count": 85,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def answer_two():\n",
+    "    import pandas as pd\n",
+    "    import numpy as np\n",
+    "    import re\n",
+    "    energy = pd.read_excel('Energy Indicators.xls',header=15, skip_footer=38)\n",
+    "    energy = (energy.drop(['Unnamed: 0','Unnamed: 1'],axis=1).drop(energy.index[0])\n",
+    "              .rename(columns={'Unnamed: 2':'Country','Renewable Electricity Production':'% Renewable'})\n",
+    "             .replace('...',np.nan))\n",
+    "    energy['Energy Supply'] = energy['Energy Supply']*1000000\n",
+    "    energy['Country'] = energy['Country'].apply(lambda x: re.sub(r\"\\(.*\\)\", \"\", x))\n",
+    "    energy['Country'] = energy['Country'].apply(lambda x: re.sub(r\"\\d+\", \"\", x))\n",
+    "    energy['Country'] = energy['Country'].replace(['Republic of Korea','United States of America', 'United Kingdom of Great Britain and Northern Ireland',\n",
+    "'China, Hong Kong Special Administrative Region', 'Iran '],['South Korea','United States','United Kingdom','Hong Kong', 'Iran'])\n",
+    "    GDP = pd.read_csv('world_bank.csv',header=4)\n",
+    "    GDP = (GDP.drop(['Indicator Name','Indicator Code','Country Code'],axis=1)\n",
+    "           .rename(columns={'Country Name':'Country'}))\n",
+    "    GDP['Country'] = GDP['Country'].replace(['Korea, Rep.','Iran, Islamic Rep.', 'Hong Kong SAR, China'],['South Korea','Iran','Hong Kong'])\n",
+    "    ScimEn = pd.read_excel('scimagojr-3.xlsx')\n",
+    "    GDP_reduced = GDP.loc[:,['Country','2006','2007','2008','2009','2010','2011','2012','2013','2014','2015']]\n",
+    "    newo = pd.merge(energy,GDP_reduced, how='outer',on='Country')\n",
+    "    finalo = pd.merge(newo,ScimEn, how = 'outer', on='Country')\n",
+    "    newi = pd.merge(energy,GDP_reduced, how='inner',on='Country')\n",
+    "    finali = pd.merge(newi,ScimEn, how = 'inner', on='Country')\n",
+    "    return len(finalo.index)-len(finali.index)\n",
+    "answer_two()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "<br>\n",
+    "\n",
+    "Answer the following questions in the context of only the top 15 countries by Scimagojr Rank (aka the DataFrame returned by `answer_one()`)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 3 (6.6%)\n",
+    "What is the average GDP over the last 10 years for each country? (exclude missing values from this calculation.)\n",
+    "\n",
+    "*This function should return a Series named `avgGDP` with 15 countries and their average GDP sorted in descending order.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 89,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "United States         1.536434e+13\n",
+       "China                 6.348609e+12\n",
+       "Japan                 5.542208e+12\n",
+       "Germany               3.493025e+12\n",
+       "France                2.681725e+12\n",
+       "United Kingdom        2.487907e+12\n",
+       "Brazil                2.189794e+12\n",
+       "Italy                 2.120175e+12\n",
+       "India                 1.769297e+12\n",
+       "Canada                1.660647e+12\n",
+       "Russian Federation    1.565459e+12\n",
+       "Spain                 1.418078e+12\n",
+       "Australia             1.164043e+12\n",
+       "South Korea           1.106715e+12\n",
+       "Iran                  4.441558e+11\n",
+       "dtype: float64"
+      ]
+     },
+     "execution_count": 89,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def answer_three():\n",
+    "    import pandas as pd\n",
+    "    import numpy as np\n",
+    "    Top15 = answer_one()\n",
+    "    avgGDP = Top15[['2006','2007','2008','2009','2010','2011','2012','2013','2014','2015']].mean(axis=1)\n",
+    "    return avgGDP.sort_values(ascending=False)\n",
+    "answer_three()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 4 (6.6%)\n",
+    "By how much had the GDP changed over the 10 year span for the country with the 6th largest average GDP?\n",
+    "\n",
+    "*This function should return a single number.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "10.1958822077 %\n"
+     ]
+    }
+   ],
+   "source": [
+    "def answer_four():\n",
+    "    Top15 = answer_one()\n",
+    "    avgGDP = Top15[['2006','2007','2008','2009','2010','2011','2012','2013','2014','2015']].mean(axis=1)\n",
+    "    avgGDP.sort_values(ascending=False, inplace=True)\n",
+    "    name = avgGDP.index.values[5]\n",
+    "    return (Top15.loc[name,['2015']].values[0]-Top15.loc[name,['2006']].values[0])/(Top15.loc[name,['2006']].values[0])*100\n",
+    "print(answer_four(),'%')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 5 (6.6%)\n",
+    "What is the mean `Energy Supply per Capita`?\n",
+    "\n",
+    "*This function should return a single number.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 46,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "157.59999999999999"
+      ]
+     },
+     "execution_count": 46,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def answer_five():\n",
+    "    Top15 = answer_one()\n",
+    "    return Top15['Energy Supply per capita'].mean(axis=0)\n",
+    "answer_five()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 6 (6.6%)\n",
+    "What country has the maximum % Renewable and what is the percentage?\n",
+    "\n",
+    "*This function should return a tuple with the name of the country and the percentage.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[69.648030000000006, 'Brazil']"
+      ]
+     },
+     "execution_count": 53,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def answer_six():\n",
+    "    Top15 = answer_one()\n",
+    "    return (Top15['% Renewable'].max(),Top15['% Renewable'].argmax())\n",
+    "answer_six()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 7 (6.6%)\n",
+    "Create a new column that is the ratio of Self-Citations to Total Citations. \n",
+    "What is the maximum value for this new column, and what country has the highest ratio?\n",
+    "\n",
+    "*This function should return a tuple with the name of the country and the ratio.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 55,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[0.68931261793894216, 'China']"
+      ]
+     },
+     "execution_count": 55,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def answer_seven():\n",
+    "    Top15 = answer_one()\n",
+    "    Top15['Ratio']=Top15['Self-citations']/Top15['Citations']\n",
+    "    answer = ([Top15['Ratio'].max(),Top15['Ratio'].argmax()])\n",
+    "    return answer\n",
+    "answer_seven()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 8 (6.6%)\n",
+    "\n",
+    "Create a column that estimates the population using Energy Supply and Energy Supply per capita. \n",
+    "What is the third most populous country according to this estimate?\n",
+    "\n",
+    "*This function should return a single string value.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'United States'"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def answer_eight():\n",
+    "    Top15 = answer_one()\n",
+    "    Top15['Population'] = Top15['Energy Supply']/Top15['Energy Supply per capita']\n",
+    "    return Top15['Population'].sort_values(ascending=False).index[2]\n",
+    "answer_eight()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 9 (6.6%)\n",
+    "Create a column that estimates the number of citable documents per person. \n",
+    "What is the correlation between the number of citable documents per capita and the energy supply per capita? Use the `.corr()` method, (Pearson's correlation).\n",
+    "\n",
+    "*This function should return a single number.*\n",
+    "\n",
+    "*(Optional: Use the built-in function `plot9()` to visualize the relationship between Energy Supply per Capita vs. Citable docs per Capita)*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.79400104354429435"
+      ]
+     },
+     "execution_count": 31,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def answer_nine():\n",
+    "    Top15 = answer_one()\n",
+    "    Top15['PopEst'] = Top15['Energy Supply'] / Top15['Energy Supply per capita']\n",
+    "    Top15['Citable docs per Capita'] = Top15['Citable documents'] / Top15['PopEst']\n",
+    "    return Top15[['Citable docs per Capita','Energy Supply per capita']].corr(method='pearson').get_value('Citable docs per Capita','Energy Supply per capita')\n",
+    "answer_nine()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "def plot9():\n",
+    "    import matplotlib as plt\n",
+    "    %matplotlib inline\n",
+    "    \n",
+    "    Top15 = answer_one()\n",
+    "    Top15['PopEst'] = Top15['Energy Supply'] / Top15['Energy Supply per capita']\n",
+    "    Top15['Citable docs per Capita'] = Top15['Citable documents'] / Top15['PopEst']\n",
+    "    Top15.plot(x='Citable docs per Capita', y='Energy Supply per capita', kind='scatter', xlim=[0, 0.0006])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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\nRU5ErkJggg==\n",
+      "text/plain": [
+       "<matplotlib.figure.Figure at 0x7f83638ee320>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "plot9() # Be sure to comment out plot9() before submitting the assignment!"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 10 (6.6%)\n",
+    "Create a new column with a 1 if the country's % Renewable value is at or above the median for all countries in the top 15, and a 0 if the country's % Renewable value is below the median.\n",
+    "\n",
+    "*This function should return a series named `HighRenew` whose index is the country name sorted in ascending order of rank.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 47,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "China                 1\n",
+       "United States         0\n",
+       "Japan                 0\n",
+       "United Kingdom        0\n",
+       "Russian Federation    1\n",
+       "Canada                1\n",
+       "Germany               1\n",
+       "India                 0\n",
+       "France                1\n",
+       "South Korea           0\n",
+       "Italy                 1\n",
+       "Spain                 1\n",
+       "Iran                  0\n",
+       "Australia             0\n",
+       "Brazil                1\n",
+       "Name: HighRenew, dtype: int64"
+      ]
+     },
+     "execution_count": 47,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def answer_ten():\n",
+    "    import numpy as np\n",
+    "    Top15 = answer_one()\n",
+    "    Top15['HighRenew'] = np.where(Top15['% Renewable'] >= Top15['% Renewable'].median(), 1, 0)\n",
+    "    answer = Top15.sort_values('Rank')\n",
+    "    return answer['HighRenew']\n",
+    "answer_ten()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 11 (6.6%)\n",
+    "Use the following dictionary to group the Countries by Continent, then create a dateframe that displays the sample size (the number of countries in each continent bin), and the sum, mean, and std deviation for the estimated population of each country.\n",
+    "\n",
+    "```python\n",
+    "ContinentDict  = {'China':'Asia', \n",
+    "                  'United States':'North America', \n",
+    "                  'Japan':'Asia', \n",
+    "                  'United Kingdom':'Europe', \n",
+    "                  'Russian Federation':'Europe', \n",
+    "                  'Canada':'North America', \n",
+    "                  'Germany':'Europe', \n",
+    "                  'India':'Asia',\n",
+    "                  'France':'Europe', \n",
+    "                  'South Korea':'Asia', \n",
+    "                  'Italy':'Europe', \n",
+    "                  'Spain':'Europe', \n",
+    "                  'Iran':'Asia',\n",
+    "                  'Australia':'Australia', \n",
+    "                  'Brazil':'South America'}\n",
+    "```\n",
+    "\n",
+    "*This function should return a DataFrame with index named Continent `['Asia', 'Australia', 'Europe', 'North America', 'South America']` and columns `['size', 'sum', 'mean', 'std']`*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>size</th>\n",
+       "      <th>sum</th>\n",
+       "      <th>mean</th>\n",
+       "      <th>std</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Continent</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>Asia</th>\n",
+       "      <td>5</td>\n",
+       "      <td>2.898666e+09</td>\n",
+       "      <td>5.797333e+08</td>\n",
+       "      <td>6.790979e+08</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Australia</th>\n",
+       "      <td>1</td>\n",
+       "      <td>2.331602e+07</td>\n",
+       "      <td>2.331602e+07</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Europe</th>\n",
+       "      <td>6</td>\n",
+       "      <td>4.579297e+08</td>\n",
+       "      <td>7.632161e+07</td>\n",
+       "      <td>3.464767e+07</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>North America</th>\n",
+       "      <td>2</td>\n",
+       "      <td>3.528552e+08</td>\n",
+       "      <td>1.764276e+08</td>\n",
+       "      <td>1.996696e+08</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>South America</th>\n",
+       "      <td>1</td>\n",
+       "      <td>2.059153e+08</td>\n",
+       "      <td>2.059153e+08</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "               size           sum          mean           std\n",
+       "Continent                                                    \n",
+       "Asia              5  2.898666e+09  5.797333e+08  6.790979e+08\n",
+       "Australia         1  2.331602e+07  2.331602e+07           NaN\n",
+       "Europe            6  4.579297e+08  7.632161e+07  3.464767e+07\n",
+       "North America     2  3.528552e+08  1.764276e+08  1.996696e+08\n",
+       "South America     1  2.059153e+08  2.059153e+08           NaN"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def answer_eleven():\n",
+    "    import numpy as np\n",
+    "    ContinentDict  = {'China':'Asia', \n",
+    "                  'United States':'North America', \n",
+    "                  'Japan':'Asia', \n",
+    "                  'United Kingdom':'Europe', \n",
+    "                  'Russian Federation':'Europe', \n",
+    "                  'Canada':'North America', \n",
+    "                  'Germany':'Europe', \n",
+    "                  'India':'Asia',\n",
+    "                  'France':'Europe', \n",
+    "                  'South Korea':'Asia', \n",
+    "                  'Italy':'Europe', \n",
+    "                  'Spain':'Europe', \n",
+    "                  'Iran':'Asia',\n",
+    "                  'Australia':'Australia', \n",
+    "                  'Brazil':'South America'}\n",
+    "    Top15 = answer_one()\n",
+    "    Top15['Continent'] = Top15.index.map(lambda x: ContinentDict[x])\n",
+    "    Top15['PopEst'] = Top15['Energy Supply'] / Top15['Energy Supply per capita']\n",
+    "    return Top15.groupby('Continent')['PopEst'].agg(['size', 'sum','mean','std'])\n",
+    "answer_eleven()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 12 (6.6%)\n",
+    "Cut % Renewable into 5 bins. Group Top15 by the Continent, as well as these new % Renewable bins. How many countries are in each of these groups?\n",
+    "\n",
+    "*This function should return a __Series__ with a MultiIndex of `Continent`, then the bins for `% Renewable`. Do not include groups with no countries.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Continent      bins            \n",
+       "Asia           (2.212, 15.753]     4\n",
+       "               (15.753, 29.227]    1\n",
+       "Australia      (2.212, 15.753]     1\n",
+       "Europe         (2.212, 15.753]     1\n",
+       "               (15.753, 29.227]    3\n",
+       "               (29.227, 42.701]    2\n",
+       "North America  (2.212, 15.753]     1\n",
+       "               (56.174, 69.648]    1\n",
+       "South America  (56.174, 69.648]    1\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def answer_twelve():\n",
+    "    import numpy as np\n",
+    "    import pandas as pd\n",
+    "    ContinentDict  = {'China':'Asia', \n",
+    "                  'United States':'North America', \n",
+    "                  'Japan':'Asia', \n",
+    "                  'United Kingdom':'Europe', \n",
+    "                  'Russian Federation':'Europe', \n",
+    "                  'Canada':'North America', \n",
+    "                  'Germany':'Europe', \n",
+    "                  'India':'Asia',\n",
+    "                  'France':'Europe', \n",
+    "                  'South Korea':'Asia', \n",
+    "                  'Italy':'Europe', \n",
+    "                  'Spain':'Europe', \n",
+    "                  'Iran':'Asia',\n",
+    "                  'Australia':'Australia', \n",
+    "                  'Brazil':'South America'}\n",
+    "    Top15 = answer_one()\n",
+    "    Top15['Continent'] = Top15.index.map(lambda x: ContinentDict[x])\n",
+    "    Top15['PopEst'] = Top15['Energy Supply'] / Top15['Energy Supply per capita']\n",
+    "    Top15['bins']=pd.cut(Top15['% Renewable'],5)\n",
+    "    return Top15.groupby(['Continent','bins']).agg('size')\n",
+    "answer_twelve()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question 13 (6.6%)\n",
+    "Convert the Population Estimate series to a string with thousands separator (using commas). Do not round the results.\n",
+    "\n",
+    "e.g. 317615384.61538464 -> 317,615,384.61538464\n",
+    "\n",
+    "*This function should return a Series `PopEst` whose index is the country name and whose values are the population estimate string.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Australia              23,316,017.316017315\n",
+       "Brazil                 205,915,254.23728815\n",
+       "Canada                  35,239,864.86486486\n",
+       "China                 1,367,645,161.2903225\n",
+       "France                  63,837,349.39759036\n",
+       "Germany                 80,369,696.96969697\n",
+       "India                 1,276,730,769.2307692\n",
+       "Iran                    77,075,630.25210084\n",
+       "Italy                  59,908,256.880733944\n",
+       "Japan                  127,409,395.97315437\n",
+       "South Korea            49,805,429.864253394\n",
+       "Russian Federation            143,500,000.0\n",
+       "Spain                    46,443,396.2264151\n",
+       "United Kingdom         63,870,967.741935484\n",
+       "United States          317,615,384.61538464\n",
+       "Name: PopEst, dtype: object"
+      ]
+     },
+     "execution_count": 22,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "def answer_thirteen():\n",
+    "    import numpy as np\n",
+    "    import pandas as pd\n",
+    "    ContinentDict  = {'China':'Asia', \n",
+    "                  'United States':'North America', \n",
+    "                  'Japan':'Asia', \n",
+    "                  'United Kingdom':'Europe', \n",
+    "                  'Russian Federation':'Europe', \n",
+    "                  'Canada':'North America', \n",
+    "                  'Germany':'Europe', \n",
+    "                  'India':'Asia',\n",
+    "                  'France':'Europe', \n",
+    "                  'South Korea':'Asia', \n",
+    "                  'Italy':'Europe', \n",
+    "                  'Spain':'Europe', \n",
+    "                  'Iran':'Asia',\n",
+    "                  'Australia':'Australia', \n",
+    "                  'Brazil':'South America'}\n",
+    "    Top15 = answer_one()\n",
+    "    Top15['Continent'] = Top15.index.map(lambda x: ContinentDict[x])\n",
+    "    Top15['PopEst'] = Top15['Energy Supply'] / Top15['Energy Supply per capita']\n",
+    "    return Top15['PopEst'].apply(lambda x: '{:,}'.format(x))\n",
+    "answer_thirteen()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Optional\n",
+    "\n",
+    "Use the built in function `plot_optional()` to see an example visualization."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 57,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "def plot_optional():\n",
+    "    import matplotlib as plt\n",
+    "    %matplotlib inline\n",
+    "    Top15 = answer_one()\n",
+    "    ax = Top15.plot(x='Rank', y='% Renewable', kind='scatter', \n",
+    "                    c=['#e41a1c','#377eb8','#e41a1c','#4daf4a','#4daf4a','#377eb8','#4daf4a','#e41a1c',\n",
+    "                       '#4daf4a','#e41a1c','#4daf4a','#4daf4a','#e41a1c','#dede00','#ff7f00'], \n",
+    "                    xticks=range(1,16), s=6*Top15['2014']/10**10, alpha=.75, figsize=[16,6]);\n",
+    "\n",
+    "    for i, txt in enumerate(Top15.index):\n",
+    "        ax.annotate(txt, [Top15['Rank'][i], Top15['% Renewable'][i]], ha='center')\n",
+    "\n",
+    "    print(\"This is an example of a visualization that can be created to help understand the data. \\\n",
+    "This is a bubble chart showing % Renewable vs. Rank. The size of the bubble corresponds to the countries' \\\n",
+    "2014 GDP, and the color corresponds to the continent.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "('Brazil', 69.648030000000006)"
+      ]
+     },
+     "execution_count": 52,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "anaconda-cloud": {},
+  "coursera": {
+   "course_slug": "python-data-analysis",
+   "graded_item_id": "zAr06",
+   "launcher_item_id": "KSSjT",
+   "part_id": "SL3fU"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.5.2"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}
